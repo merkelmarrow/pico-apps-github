@@ -1,4 +1,12 @@
 ﻿
+# To use with the CMakePresets.json file, the following have to be in your systems PATH:
+# arm-none-eabi-gcc
+# arm-none-eabi-g++
+# mingw32-make
+
+# PICO_SDK_PATH must be set in your environment variables
+
+# CMake minimum version must be 3.13 or higher in order to use the Pico SDK
 cmake_minimum_required (VERSION 3.13)
 
 # initialize the SDK based on PICO_SDK_PATH

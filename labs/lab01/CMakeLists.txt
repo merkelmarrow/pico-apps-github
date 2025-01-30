@@ -2,7 +2,7 @@
 add_executable(lab01)
 
 # Specify the source files to be compiled.
-target_sources(lab01 PRIVATE lab01.c)
+target_sources(lab01 PRIVATE "lab01.cpp")
 
 # Pull in commonly used features.
 target_link_libraries(lab01 PRIVATE pico_stdlib)

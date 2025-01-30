@@ -1,4 +1,4 @@
-
+﻿
 # To use with the CMakePresets.json file, the following have to be in your systems PATH:
 # arm-none-eabi-gcc
 # arm-none-eabi-g++
@@ -14,13 +14,12 @@ cmake_minimum_required (VERSION 3.13)
 # must set PICO_SDK_PATH in your environment variables
 include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
-project ("pico-cmake-cpp-template" C CXX ASM)
+project ("pico-cmake-cpp-template")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# used by pico_set_program_url
-set(PICO_APPS_PATH ${PROJECT_SOURCE_DIR})
+add_executable (pico-cmake-cpp-template "pico-cmake-cpp-template.cpp" )
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
@@ -33,4 +32,8 @@ add_compile_options(-Wall
         -Wno-maybe-uninitialized
         )
 
-add_subdirectory(labs)
+# Add the standard library to the build
+target_link_libraries(pico-cmake-cpp-template pico_stdlib)
+
+# Replace "pico-cmake-cpp-template" with the appropriate target
+pico_add_extra_outputs(pico-cmake-cpp-template)

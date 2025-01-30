@@ -1,5 +1,5 @@
 /*****************************************************************//**
- * \file   lab01_multithreaded.cpp
+ * \file   lab01_multicore.cpp
  * \brief  simple LED blink program for the Raspberry Pi Pico
  *
  * This is similar to lab01.cpp but uses the multicore API to

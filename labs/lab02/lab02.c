@@ -34,18 +34,18 @@ int main() {
 }
 
 float wallis_prod_float (int n) {
-    float product = 4 / 3;
+    float product = 4.0 / 3.0;
     for (int i = 2; i <= n; i++) {
-        float multiplier = ((2 * i) / (2 * i - 1)) * ((2 * i) / (2 * i + 1));
+        float multiplier = ((2.0 * i) / (2.0 * i - 1)) * ((2.0 * i) / (2.0 * i + 1));
         product *= multiplier;
     }
     return product;
 }
 
 double wallis_prod_double (int n) {
-    double product = 4 / 3;
+    double product = 4.0 / 3.0;
     for (int i = 2; i <= n; i++) {
-        double multiplier = ((2 * i) / (2 * i - 1)) * ((2 * i) / (2 * i + 1));
+        double multiplier = ((2.0 * i) / (2.0 * i - 1)) * ((2.0 * i) / (2.0 * i + 1));
         product *= multiplier;
     }
     return product;

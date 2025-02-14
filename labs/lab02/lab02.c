@@ -1,52 +1,59 @@
 #include <stdlib.h>
-#include <math.h>
-#include "pico/float.h"     // Required for using single-precision variables.
-#include "pico/double.h"    // Required for using double-precision variables.
-
-//#define WOKWI             // Uncomment if running on Wokwi RP2040 emulator.
-
 #include <stdio.h>
+#include <math.h>
+#include "pico/float.h"
+#include "pico/double.h"
 #include "pico/stdlib.h"
 
-float wallis_prod_float(int n);
-double wallis_prod_double(int n);
 
-/**
- * @brief EXAMPLE - HELLO_C
- *        Simple example to initialise the IOs and then
- *        print a "Hello World!" message to the console.
- *
- * @return int  Application return code (zero for success).
- */
+#define ITERATIONS 100000
+#define ACTUAL_PI 3.14159265359
+
+// uncomment below if running in wokwi
+// #define WOKWI
+
+float wallis_prod_float(size_t n);
+double wallis_prod_double(size_t n);
+
 int main() {
 
 #ifndef WOKWI
-    // Initialise the IO as we will be using the UART
-    // Only required for hardware and not needed for Wokwi
-    stdio_init_all();
+	stdio_init_all();
 #endif
 
-    // Print a console message to inform user what's going on.
-    printf("Hello World!\n");
+	// give time to prepare console
+	sleep_ms(10000);
 
-    // Returning zero indicates everything went okay.
-    return 0;
+	float pi_float = wallis_prod_float(ITERATIONS);
+	double pi_double = wallis_prod_double(ITERATIONS);
+
+	printf("Wallis PI (float): %.11f, Error: %.11f\n", pi_float, fabsf(pi_float - ACTUAL_PI));
+	printf("Wallis PI (double): %.11lf, Error: %.11lf\n", pi_double, fabs(pi_double - ACTUAL_PI));
+
+
+
+	printf("Success. Press any character to close the window.");
+	getchar();
+
+	return 0;
 }
 
-float wallis_prod_float (int n) {
-    float product = 4.0 / 3.0;
-    for (int i = 2; i <= n; i++) {
-        float multiplier = ((2.0 * i) / (2.0 * i - 1)) * ((2.0 * i) / (2.0 * i + 1));
-        product *= multiplier;
-    }
-    return product;
+float wallis_prod_float(size_t n) {
+	float product = 1.0f;
+	for (size_t i = 1; i <= n; i++) {
+		float term = (2.0f * i) / (2.0f * i - 1.0f);
+		product *= term;
+		product *= (2.0f * i) / (2.0f * i + 1.0f);
+	}
+	return product * 2.0f;
 }
 
-double wallis_prod_double (int n) {
-    double product = 4.0 / 3.0;
-    for (int i = 2; i <= n; i++) {
-        double multiplier = ((2.0 * i) / (2.0 * i - 1)) * ((2.0 * i) / (2.0 * i + 1));
-        product *= multiplier;
-    }
-    return product;
+double wallis_prod_double(size_t n) {
+	double product = 1.0;
+	for (size_t i = 1; i <= n; i++) {
+		double term = (2.0 * i) / (2.0 * i - 1.0);
+		product *= term;
+		product *= (2.0 * i) / (2.0 * i + 1.0);
+	}
+	return product * 2.0;
 }

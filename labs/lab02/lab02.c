@@ -27,13 +27,18 @@ int main() {
 	float pi_float = wallis_prod_float(ITERATIONS);
 	double pi_double = wallis_prod_double(ITERATIONS);
 
-	printf("Wallis PI (float): %.11f, Error: %.11f\n", pi_float, fabsf(pi_float - ACTUAL_PI));
-	printf("Wallis PI (double): %.11lf, Error: %.11lf\n", pi_double, fabs(pi_double - ACTUAL_PI));
+	// Calculate errors for float and double
+	float error_float = fabsf(pi_float - ACTUAL_PI);
+	double error_double = fabs(pi_double - ACTUAL_PI);
+	float percentage_error_float = (error_float / ACTUAL_PI) * 100.0f;
+	double percentage_error_double = (error_double / ACTUAL_PI) * 100.0;
 
+	printf("\n\n\n\t   Precision   |   Calculated PI   |   Absolute Error   |   Percentage Error   \n");
+	printf("\t-------------------------------------------------------------------------------\n");
+	printf("\t     Float     |   %.11f   |   %.11f    |     %.11f%%\n", pi_float, error_float, percentage_error_float);
+	printf("\t-------------------------------------------------------------------------------\n");
+	printf("\t     Double    |   %.11lf   |   %.11lf    |     %.11lf%%\n\n", pi_double, error_double, percentage_error_double);
 
-
-	printf("Success. Press any character to close the window.");
-	getchar();
 
 	return 0;
 }

@@ -1,3 +1,12 @@
+/*****************************************************************//**
+ * \file   lab02.c
+ * \brief  approximation of pi using wallis product, comparing precision
+ *		   of float and double
+ * 
+ * \author marco
+ * \date   February 2025
+ *********************************************************************/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -5,18 +14,40 @@
 #include "pico/double.h"
 #include "pico/stdlib.h"
 
-
 #define ITERATIONS 100000
 #define ACTUAL_PI 3.14159265359
 
 // uncomment below if running in wokwi
 // #define WOKWI
 
+
+/**
+ * @brief computes pi approximation using wallis product formula with single precision floats
+ * 
+ * pi / 2 = product from i = 1 to n of [(2i / (2i - 1)) * (2i / (2i + 1))]
+ * multiply the final product by 2 to get pi approximation
+ * 
+ * @param n Number of iterations
+ */
 float wallis_prod_float(size_t n);
+
+
+/**
+ * @brief computes pi approximation using wallis product formula with double precision floats
+ * 
+ * calculation is identical to wallis_prod_float except with doubles instead of floats
+ * 
+ * @param n Number of iterations
+ */
 double wallis_prod_double(size_t n);
 
-int main() {
 
+/**
+ * @brief main computes pi approximations and prints their values and the associated errors
+ */
+int main() {
+	// needed for hardware (initialises USB input/output)
+	// not needed for Wokwi simulator
 #ifndef WOKWI
 	stdio_init_all();
 #endif

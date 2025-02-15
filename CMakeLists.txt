@@ -14,7 +14,7 @@ cmake_minimum_required (VERSION 3.13)
 # must set PICO_SDK_PATH in your environment variables
 include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
-project ("pico-cmake-cpp-template" C CXX ASM)
+project ("pico-cmake-cpp" C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -24,6 +24,7 @@ set(PICO_APPS_PATH ${PROJECT_SOURCE_DIR})
 
 # initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
+
 
 include(apps_auto_set_url.cmake)
 

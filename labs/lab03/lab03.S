@@ -50,18 +50,6 @@ led_set_state:
     bl      asm_gpio_put                @ Update the the value of the LED GPIO pin (based on value in r1)
     pop     {pc}                        @ Pop the link register from the stack to the program counter
 
-@ Subroutine to check the pin state
-@ r0 (input) is the button state
-@ r0 is the output boolean
-check_button_state:
-    cmp     r0, #0
-    beq     check_button_state_false
-    movs    r0, #0
-    bx      lr
-check_button_state_false:
-    movs    r0, #1
-    bx      lr
-
 @ Set data alignment
 .data
     .align 4

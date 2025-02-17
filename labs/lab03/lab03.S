@@ -18,6 +18,11 @@ main_asm:
     movs    r0, #LED_GPIO_PIN           @ This value is the GPIO LED pin on the PI PICO board
     movs    r1, #LED_GPIO_OUT           @ We want this GPIO pin to be setup as an output pin
     bl      asm_gpio_set_dir            @ Call the subroutine to set the GPIO pin specified by r0 to state specified by r1
+    movs    r0, #21
+    bl      asm_gpio_init               @ initialise pin 21
+    movs    r0, #21
+    movs    r1, #0
+    bl      asm_gpio_set_dir            @ set direction of pin 21 to input
 loop:
     ldr     r0, =SLEEP_TIME             @ Set the value of SLEEP_TIME we want to wait for
     bl      sleep_ms                    @ Sleep until SLEEP_TIME has elapsed then toggle the LED GPIO pin

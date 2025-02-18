@@ -27,9 +27,9 @@ loop:
     ldr     r0, =SLEEP_TIME             @ Set the value of SLEEP_TIME we want to wait for
     bl      sleep_ms                    @ Sleep until SLEEP_TIME has elapsed then toggle the LED GPIO pin
     movs    r0, #21
-    asm_gpio_get
+    bl      asm_gpio_get
     cmp     r0, #0
-    beq     loop
+    bne     loop
     bl      sub_toggle                  @ Call the subroutine to toggle the current LED GPIO pin value
     b       loop                        @ Repeat the loop
 

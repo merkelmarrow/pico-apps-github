@@ -5,3 +5,4 @@ build/
 */.vs
 .vs
 out
+.vscode/

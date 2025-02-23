@@ -1,18 +1,38 @@
+# == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
+if(WIN32)
+    set(USERHOME $ENV{USERPROFILE})
+else()
+    set(USERHOME $ENV{HOME})
+endif()
+set(sdkVersion 2.1.1)
+set(toolchainVersion 14_2_Rel1)
+set(picotoolVersion 2.1.1)
+set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
+if (EXISTS ${picoVscode})
+    include(${picoVscode})
+endif()
+# ====================================================================================
+set(PICO_BOARD pico CACHE STRING "Board type")
 
-# To use with the CMakePresets.json file, the following have to be in your systems PATH:
-# arm-none-eabi-gcc
-# arm-none-eabi-g++
-# mingw32-make
-
-# PICO_SDK_PATH must be set in your environment variables
 
 # CMake minimum version must be 3.13 or higher in order to use the Pico SDK
 cmake_minimum_required (VERSION 3.13)
 
+if(NOT DEFINED CMAKE_C_COMPILER)
+    set(CMAKE_C_COMPILER "arm-none-eabi-gcc" CACHE STRING "C Compiler for Pico" FORCE)
+endif()
+if(NOT DEFINED CMAKE_CXX_COMPILER)
+    set(CMAKE_CXX_COMPILER "arm-none-eabi-g++" CACHE STRING "C++ Compiler for Pico" FORCE)
+endif()
+
+# Define the Pico SDK path
+# this is the path automatically set by vscode extension
+set(PICO_SDK_PATH "${USERHOME}/.pico-sdk/sdk/2.1.1")
+
 # initialize the SDK based on PICO_SDK_PATH
 # this must be done before project()
-# must set PICO_SDK_PATH in your environment variables
-include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
+include(pico_sdk_import.cmake)
+
 
 project ("pico-cmake-cpp" C CXX ASM)
 set(CMAKE_C_STANDARD 11)

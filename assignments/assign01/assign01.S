@@ -162,11 +162,13 @@ led_set_state:
 @ Funtion to initialise LED pins
 init_leds:
     push {lr}
+    
     movs r0, #GPIO_LED_PIN
     bl asm_gpio_init
     movs r0, #GPIO_LED_PIN
     movs r1, #GPIO_DIR_OUT
     bl asm_gpio_set_dir
+
     pop {pc}
 
 init_btns:
@@ -207,10 +209,6 @@ init_btns:
 alrm_isr:
     push {lr}
 
-    @ print alarm message
-    ldr r0, =alarm_msg
-    bl printf
-
     @ clear the interrupt
     ldr r2, =(TIMER_BASE + TIMER_INTR_OFFSET)
     movs r1, #1
@@ -224,10 +222,106 @@ alrm_isr:
     bl toggle_led
     pop {pc}
 
+@ GPIO ISR Handler
+.thumb_func
+gpio_isr:
+    push {lr}
+
+    @ load interrupt status
+    ldr r2, =(IO_BANK_BASE + IO_BANK0_PROC0_INTS2_OFFSET)
+    ldr r1, [r2]
+
+    @ check if "down" button (GP20) was pressed
+    ldr r3, =GPIO_BTN_DN_MSK
+    ands r4, r1, r3
+    cmp r4, #0
+    beq not_dn
+
+    @ clear the interrupt for "down" button
+    ldr r2, =(IO_BANK_BASE + IO_BANK0_INTR2_OFFSET)
+    str r3, [r2]
+
+    @ check if LED is in a flashing state
+    ldr r4, =lstate
+    ldr r5, [r4]
+    cmp r5, #DFLT_STATE_STRT
+    beq not_paused
+
+    @ LED is not flashing, reset timer to default
+    ldr r4, =ltimer
+    ldr r5, =DFLT_ALARM_TIME
+    str r5, [r4]
+
+    b gpio_isr_end
+
+not_paused:
+    @ LED is flashing, halve the flashing rate (double the interval)
+    ldr r1, =ltimer
+    ldr r3, [r1]
+    lsls r3, #1 @ Multiply by 2
+    str r3, [r1]
+
+    b gpio_isr_end
+
+not_dn:
+    @ check the interrupt for "enter" button
+    ldr r2, =(IO_BANK0_BASE + IO_BANK0_INTR2_OFFSET)
+    str r3, [r2]
+
+    @ load the current LED state
+    ldr r2, =lstate
+    ldr r3, [r2]
+
+    @ toggle the LED flashing state
+    cmp r3, #DFLT_STATE_STRT
+    bne start_timer
+
+    @ stop flashing
+    movs r1, #DFLT_STATE_STOP
+    str r1, [r2]
+
+    b gpio_isr_end
+
+start_timer:
+    @ start flashing
+    movs r1, #DFLT_STATE_STRT
+    str r1, [r2]
+
+not_en:
+    @ check if "up" button (GP22) was pressed
+    ldr r3, =GPIO_BTN_DN_MSK
+    ands r4, r1, r3
+    cmp r4, #0
+    beq gpio_isr_end
+
+    @ clear the interrupt for "up" button
+    ldr r2, =(IO_BANK0_BASE + IO_BANK0_INTR2_OFFSET)
+    str r3, [r2]
+
+    @ check if LED is in flashing state
+    ldr r4, =lstate
+    ldr r5, [r4]
+    cmp r5, #DFLT_STATE_STRT
+    beq not_paused_up
+
+    @ LED is not flashing, reset timer to default
+    ldr r4, =ltimer
+    ldr r5, =DFLT_ALARM_TIME
+    str r5, [r4]
+
+not_paused_up:
+    @ LED is flashing, double the flashing rate (halve the interval)
+    ldr r1, =ltimer
+    ldr r3, [r1]
+    asrs r3, #1 @ Divide by 2
+    str r3, [r1]
+
+gpio_isr_end:
+    pop {pc}
+    
 
 .align 4
 hello_msg: .asciz "Hello World!\n"
-alarm_msg: .asciz "Timer alarm triggered.\n"
 
 .data
 lstate: .word DFLT_STATE_STRT               @ Initial LED state (flashing)

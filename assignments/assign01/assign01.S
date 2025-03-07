@@ -77,6 +77,42 @@ install_alarm_isr:
 
     pop {pc}
 
+@ Subroutine to set up a new alarm
+set_alarm:
+    push {lr}
+
+    @ Check if LED is in flashing state
+    ldr r2, =lstate
+    ldr r0, [r2]
+    cmp r0, #DFLT_STATE_STRT
+    bne skip_alarm @ If LED is not flashing, skip setting alarm
+
+    @ Load current time
+    ldr r2, =(TIMER_BASE + TIMER_TIMELR_OFFSET)
+    ldr r0, [r2]
+
+    @ Load alarm interval
+    ldr r2, =ltimer
+    ldr r1, [r2]
+
+    @ Add interval to current time
+    add r0, r1
+
+    @ Set alarm
+    ldr r2, =(TIMER_BASE + TIMER_ALARM0_OFFSET)
+    str r0, [r2]
+
+    @ Enable the alarm interrupt
+    ldr r2, =(TIMER_BASE + TIMER_INTE_OFFSET)
+    ldr r1, [r2]
+    movs r0, #1
+    orrs r1, r0
+    str r1, [r2]
+
+skip_alarm:
+    pop {pc}
+
+
 @ Subroutine to toggle the LED GPIO pin value based on lab 3
 toggle_led:
     push {lr}                               @ Store the link register to the stack

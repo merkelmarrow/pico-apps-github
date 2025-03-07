@@ -16,9 +16,14 @@ bool asm_gpio_get(uint pin) {
     return gpio_get(pin);
 }
 
-void asm_gpio_put(uint pin) {
+void asm_gpio_put(uint pin, bool value) {
+    gpio_put(pin, value);
+}
+
+void asm_gpio_set_irq(uint pin) {
     gpio_set_irq_enabled(pin, GPIO_IRQ_EDGE_FALL, true);
 }
+
 
 int main() {
     stdio_init_all();

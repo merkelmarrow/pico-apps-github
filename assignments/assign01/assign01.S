@@ -34,37 +34,39 @@
 
 @ Entry point to the ASM portion of the program
 main_asm:
-    ldr r0, =hello_msg
-    bl printf
     bl init_leds                            @ Initialise LED pins
+    
 
 @ main loop toggles LED for testing purposes
 main_loop:
-    movs r0, #GPIO_LED_PIN
-    bl asm_gpio_get
-    cmp r0, #LED_VAL_OFF
-    beq turn_off
+    ldr r0, =hello_msg
+    bl printf
+    bl toggle_led
 
-turn_on:
-    movs r0, #GPIO_LED_PIN
-    movs r1, #LED_VAL_ON
-    bl asm_gpio_put
-    b delay
-
-turn_off:
-    movs r0, #GPIO_LED_PIN
-    movs r1, #LED_VAL_OFF
-    bl asm_gpio_put
-
-delay:
     @ delay function for testing only
-    ldr r0, =500000
+    ldr r0, =50000000
     delay_loop:
         subs r0, #1
         bne delay_loop
 
-    b main_loop                             @ Return to main loop once cycles have been iterated through
+    b main_loop
 
+@ Subroutine to toggle the LED GPIO pin value based on lab 3
+toggle_led:
+    push {lr}                               @ Store the link register to the stack
+    movs r0, #GPIO_LED_PIN                  @ Set the LED GPIO pin number to r0
+    bl asm_gpio_get                         @ Get current value of the LED GPIO pin
+    cmp r0, #LED_VAL_OFF                    @ Check if the LED GPIO pin value is "off"
+    beq led_set_on                          @ If it is "off" then jump to code to turn it on
+led_set_off:
+    movs r1, #LED_VAL_OFF                   @ The LED is currently "on" so we want to turn it "off"
+    b led_set_state                         @ Jump to portion of code where we set the state
+led_set_on:
+    movs r1, #LED_VAL_ON                    @ The LED is currently "off" so we want to turn it "on"
+led_set_state:
+    movs r0, #GPIO_LED_PIN                  @ Set the LED GPIO pin number to r0
+    bl asm_gpio_put                         @ Update the value of the LED GPIO pin (based on r1)
+    pop {pc}                                @ Pop the link register from the stack to the program counter
 
 @ Funtion to initialise LED pins
 init_leds:

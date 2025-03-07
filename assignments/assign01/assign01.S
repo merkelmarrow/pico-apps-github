@@ -44,8 +44,8 @@ main_asm:
 
     bl init_leds                            @ Initialise LED pins
     bl install_alarm_isr                    @ Install the alarm ISR handler
-    bl install_gpio_isr
-    bl init_btns
+    bl install_gpio_isr                     @ Install the GPIO ISR handler
+    bl init_btns                            @ Initialise the button pins
     
 
 @ main loop toggles LED for testing purposes
@@ -84,7 +84,7 @@ install_alarm_isr:
 install_gpio_isr:
     push {lr}
     @ Get the address of the RAM vector table
-    ldr r2, (PPB_BASE + M0PLUS_VTOR_OFFSET)
+    ldr r2, =(PPB_BASE + M0PLUS_VTOR_OFFSET)
     ldr r1, [r2]
     ldr r2, =GPIO_ISR_OFFSET
     add r2, r1
@@ -142,24 +142,7 @@ skip_alarm:
     pop {pc}
 
 
-@ Subroutine to toggle the LED GPIO pin value based on lab 3
-toggle_led:
-    push {lr}                               @ Store the link register to the stack
-    movs r0, #GPIO_LED_PIN                  @ Set the LED GPIO pin number to r0
-    bl asm_gpio_get                         @ Get current value of the LED GPIO pin
-    cmp r0, #LED_VAL_OFF                    @ Check if the LED GPIO pin value is "off"
-    beq led_set_on                          @ If it is "off" then jump to code to turn it on
-led_set_off:
-    movs r1, #LED_VAL_OFF                   @ The LED is currently "on" so we want to turn it "off"
-    b led_set_state                         @ Jump to portion of code where we set the state
-led_set_on:
-    movs r1, #LED_VAL_ON                    @ The LED is currently "off" so we want to turn it "on"
-led_set_state:
-    movs r0, #GPIO_LED_PIN                  @ Set the LED GPIO pin number to r0
-    bl asm_gpio_put                         @ Update the value of the LED GPIO pin (based on r1)
-    pop {pc}                                @ Pop the link register from the stack to the program counter
-
-@ Funtion to initialise LED pins
+@ subroutine to initialise LED pins
 init_leds:
     push {lr}
     
@@ -171,6 +154,7 @@ init_leds:
 
     pop {pc}
 
+@ subroutine to initialise button pins
 init_btns:
     push {lr}
 
@@ -183,7 +167,7 @@ init_btns:
     movs r0, #GPIO_BTN_DN
     bl asm_gpio_set_irq
 
-    @ initialise "enter" button (GP20)
+    @ initialise "enter" button (GP21)
     movs r0, #GPIO_BTN_EN
     bl asm_gpio_init
     movs r0, #GPIO_BTN_EN
@@ -209,6 +193,10 @@ init_btns:
 alrm_isr:
     push {lr}
 
+    @ print alarm message
+    ldr r0, =alarm_msg
+    bl printf
+
     @ clear the interrupt
     ldr r2, =(TIMER_BASE + TIMER_INTR_OFFSET)
     movs r1, #1
@@ -217,9 +205,22 @@ alrm_isr:
     @ get current LED state
     movs r0, #GPIO_LED_PIN
     bl asm_gpio_get
-
-    @ toggle LED
-    bl toggle_led
+    
+    @ toggle LED state
+    cmp r0, #LED_VAL_OFF
+    beq led_set_on
+    
+led_set_off:
+    movs r1, #LED_VAL_OFF
+    b led_set_state
+    
+led_set_on:
+    movs r1, #LED_VAL_ON
+    
+led_set_state:
+    movs r0, #GPIO_LED_PIN
+    bl asm_gpio_put
+    
     pop {pc}
 
 @ GPIO ISR Handler
@@ -233,13 +234,17 @@ gpio_isr:
 
     @ check if "down" button (GP20) was pressed
     ldr r3, =GPIO_BTN_DN_MSK
-    ands r4, r1, r3
+    and r4, r1, r3
     cmp r4, #0
     beq not_dn
 
     @ clear the interrupt for "down" button
     ldr r2, =(IO_BANK0_BASE + IO_BANK0_INTR2_OFFSET)
     str r3, [r2]
+
+    @ print buttons message
+    ldr r0, =dn_msg
+    bl printf
 
     @ check if LED is in a flashing state
     ldr r4, =lstate
@@ -251,6 +256,9 @@ gpio_isr:
     ldr r4, =ltimer
     ldr r5, =DFLT_ALARM_TIME
     str r5, [r4]
+
+    ldr r0, =reset_msg
+    bl printf
 
     b gpio_isr_end
 
@@ -264,7 +272,13 @@ not_paused:
     b gpio_isr_end
 
 not_dn:
-    @ check the interrupt for "enter" button
+    @ check if "enter" button (GP21) was pressed
+    ldr r3, =GPIO_BTN_EN_MSK
+    and r4, r1, r3
+    cmp r4, #0
+    beq not_en
+
+    @ clear the interrupt for "enter" button
     ldr r2, =(IO_BANK0_BASE + IO_BANK0_INTR2_OFFSET)
     str r3, [r2]
 
@@ -279,6 +293,9 @@ not_dn:
     @ stop flashing
     movs r1, #DFLT_STATE_STOP
     str r1, [r2]
+    
+    ldr r0, =pause_msg
+    bl printf
 
     b gpio_isr_end
 
@@ -287,16 +304,24 @@ start_timer:
     movs r1, #DFLT_STATE_STRT
     str r1, [r2]
 
+    ldr r0, =start_msg
+    bl printf
+
+    b gpio_isr_end
+
 not_en:
     @ check if "up" button (GP22) was pressed
     ldr r3, =GPIO_BTN_UP_MSK
-    ands r4, r1, r3
+    and r4, r1, r3
     cmp r4, #0
     beq gpio_isr_end
 
     @ clear the interrupt for "up" button
     ldr r2, =(IO_BANK0_BASE + IO_BANK0_INTR2_OFFSET)
     str r3, [r2]
+
+    ldr r0, =up_msg
+    bl printf
 
     @ check if LED is in flashing state
     ldr r4, =lstate
@@ -308,6 +333,11 @@ not_en:
     ldr r4, =ltimer
     ldr r5, =DFLT_ALARM_TIME
     str r5, [r4]
+
+    ldr r0, =reset_msg
+    bl printf
+    
+    b gpio_isr_end
 
 not_paused_up:
     @ LED is flashing, double the flashing rate (halve the interval)
@@ -322,6 +352,12 @@ gpio_isr_end:
 
 .align 4
 hello_msg: .asciz "Hello World!\n"
+alarm_msg: .asciz "Timer alarm triggered!\n"
+dn_msg: .asciz "LED flashing rate halved\n"
+up_msg: .asciz "LED flashing rate doubled\n"
+reset_msg: .asciz "LED flashing rate reset\n"
+pause_msg: .asciz "LED paused\n"
+start_msg: .asciz "LED started\n"
 
 .data
 lstate: .word DFLT_STATE_STRT               @ Initial LED state (flashing)

@@ -12,3 +12,5 @@ pico_add_extra_outputs(assign01)
 
 # Add the URL via pico_set_program_url.
 apps_auto_set_url(assign01)
+
+pico_enable_stdio_usb(assign01 1)

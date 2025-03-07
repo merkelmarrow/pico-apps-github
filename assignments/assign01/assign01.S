@@ -140,8 +140,32 @@ init_leds:
     bl asm_gpio_set_dir
     pop {pc}
 
+@ Alarm ISR Handler
+.thumb_func
+alrm_isr:
+    push {lr}
+
+    @ print alarm message
+    ldr r0, =alarm_msg
+    bl printf
+
+    @ clear the interrupt
+    ldr r2, =(TIMER_BASE + TIMER_INTR_OFFSET)
+    movs r1, #1
+    str r1, [r2]
+
+    @ get current LED state
+    movs r0, #GPIO_LED_PIN
+    bl asm_gpio_get
+
+    @ toggle LED
+    bl toggle_led
+    pop {pc}
+
+
 .align 4
 hello_msg: .asciz "Hello World!\n"
+alarm_msg: .asciz "Timer alarm triggered.\n"
 
 .data
 lstate: .word DFLT_STATE_STRT               @ Initial LED state (flashing)

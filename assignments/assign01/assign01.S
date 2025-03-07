@@ -289,7 +289,7 @@ start_timer:
 
 not_en:
     @ check if "up" button (GP22) was pressed
-    ldr r3, =GPIO_BTN_DN_MSK
+    ldr r3, =GPIO_BTN_UP_MSK
     ands r4, r1, r3
     cmp r4, #0
     beq gpio_isr_end

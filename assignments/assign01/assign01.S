@@ -234,7 +234,8 @@ gpio_isr:
 
     @ check if "down" button (GP20) was pressed
     ldr r3, =GPIO_BTN_DN_MSK
-    and r4, r1, r3
+    mov r4, r1
+    ands r4, r3
     cmp r4, #0
     beq not_dn
 
@@ -274,7 +275,8 @@ not_paused:
 not_dn:
     @ check if "enter" button (GP21) was pressed
     ldr r3, =GPIO_BTN_EN_MSK
-    and r4, r1, r3
+    mov r4, r1
+    ands r4, r3
     cmp r4, #0
     beq not_en
 
@@ -312,7 +314,8 @@ start_timer:
 not_en:
     @ check if "up" button (GP22) was pressed
     ldr r3, =GPIO_BTN_UP_MSK
-    and r4, r1, r3
+    mov r4, r1
+    ands r4, r3
     cmp r4, #0
     beq gpio_isr_end
 

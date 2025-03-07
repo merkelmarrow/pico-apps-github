@@ -55,4 +55,5 @@ add_compile_options(-Wall
         )
 
 add_subdirectory(labs)
+add_subdirectory(examples)
 add_subdirectory(tools/debugprobe)

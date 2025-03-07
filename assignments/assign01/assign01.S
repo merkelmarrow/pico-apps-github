@@ -76,7 +76,7 @@ install_alarm_isr:
     @ enable the ALARM0 IRQ by writing to ISER
     ldr r2, =(PPB_BASE + M0PLUS_NVIC_ISER_OFFSET)
     movs r0, #1
-    str r0, [2]
+    str r0, [r2]
 
     pop {pc}
 
@@ -84,7 +84,7 @@ install_alarm_isr:
 install_gpio_isr:
     push {lr}
     @ Get the address of the RAM vector table
-    ldr r2 = (PPB_BASE + M0PLUS_VTOR_OFFSET)
+    ldr r2, (PPB_BASE + M0PLUS_VTOR_OFFSET)
     ldr r1, [r2]
     ldr r2, =GPIO_ISR_OFFSET
     add r2, r1
@@ -228,7 +228,7 @@ gpio_isr:
     push {lr}
 
     @ load interrupt status
-    ldr r2, =(IO_BANK_BASE + IO_BANK0_PROC0_INTS2_OFFSET)
+    ldr r2, =(IO_BANK0_BASE + IO_BANK0_PROC0_INTS2_OFFSET)
     ldr r1, [r2]
 
     @ check if "down" button (GP20) was pressed
@@ -238,7 +238,7 @@ gpio_isr:
     beq not_dn
 
     @ clear the interrupt for "down" button
-    ldr r2, =(IO_BANK_BASE + IO_BANK0_INTR2_OFFSET)
+    ldr r2, =(IO_BANK0_BASE + IO_BANK0_INTR2_OFFSET)
     str r3, [r2]
 
     @ check if LED is in a flashing state

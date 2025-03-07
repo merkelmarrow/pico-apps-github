@@ -44,6 +44,8 @@ main_asm:
 
     bl init_leds                            @ Initialise LED pins
     bl install_alarm_isr                    @ Install the alarm ISR handler
+    bl install_gpio_isr
+    bl init_btns
     
 
 @ main loop toggles LED for testing purposes
@@ -53,6 +55,7 @@ main_loop:
     wfi                                     @ Wait for interrupt
     b main_loop                             @ Return to main loop
 
+@ subroutine to install the GPIO ISR handler
 install_alarm_isr:
     push {lr}
     @ get the address of RAM vector table
@@ -66,7 +69,7 @@ install_alarm_isr:
     str r0, [r2]
 
     @ disable the ALARM0 IRQ by writing to ICPR
-    ldr r2, =(PPB_BASE + M0PLUS_ICPR_OFFSET) @ PPB + interrupt clear pending register offset
+    ldr r2, =(PPB_BASE + M0PLUS_NVIC_ICPR_OFFSET) @ PPB + interrupt clear pending register offset
     movs r0, #1
     str r0, [r2]
 
@@ -76,6 +79,32 @@ install_alarm_isr:
     str r0, [2]
 
     pop {pc}
+
+@ subroutine to install the GPIO ISR handler
+install_gpio_isr:
+    push {lr}
+    @ Get the address of the RAM vector table
+    ldr r2 = (PPB_BASE + M0PLUS_VTOR_OFFSET)
+    ldr r1, [r2]
+    ldr r2, =GPIO_ISR_OFFSET
+    add r2, r1
+    ldr r0, =gpio_isr
+
+    @ store the address of the gpio_isr handler to the vector table
+    str r0, [r2]
+    
+    @ disable the GPIO IRQ (int #13)
+    ldr r0, =0x1
+    lsls r0, #13
+    ldr r1, =(PPB_BASE + M0PLUS_NVIC_ICPR_OFFSET)
+    str r0, [r1]
+
+    @ enable the GPIO IRQ (int #13)
+    ldr r1, =(PPB_BASE + M0PLUS_NVIC_ISER_OFFSET)
+    str r0, [r1]
+
+    pop {pc}
+
 
 @ Subroutine to set up a new alarm
 set_alarm:
@@ -139,6 +168,39 @@ init_leds:
     movs r1, #GPIO_DIR_OUT
     bl asm_gpio_set_dir
     pop {pc}
+
+init_btns:
+    push {lr}
+
+    @ initialise "down" button (GP20)
+    movs r0, #GPIO_BTN_DN
+    bl asm_gpio_init
+    movs r0, #GPIO_BTN_DN
+    movs r1, #GPIO_DIR_IN
+    bl asm_gpio_set_dir
+    movs r0, #GPIO_BTN_DN
+    bl asm_gpio_set_irq
+
+    @ initialise "enter" button (GP20)
+    movs r0, #GPIO_BTN_EN
+    bl asm_gpio_init
+    movs r0, #GPIO_BTN_EN
+    movs r1, #GPIO_DIR_IN
+    bl asm_gpio_set_dir
+    movs r0, #GPIO_BTN_EN
+    bl asm_gpio_set_irq
+
+    @ initialise the "up" button (GP22)
+    movs r0, #GPIO_BTN_UP
+    bl asm_gpio_init
+    movs r0, #GPIO_BTN_UP
+    movs r1, #GPIO_DIR_IN
+    bl asm_gpio_set_dir
+    movs r0, #GPIO_BTN_UP
+    bl asm_gpio_set_irq
+
+    pop {pc}
+
 
 @ Alarm ISR Handler
 .thumb_func

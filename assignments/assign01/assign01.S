@@ -34,22 +34,48 @@
 
 @ Entry point to the ASM portion of the program
 main_asm:
-    bl init_leds                            @ Initialise LED pins
-    
-
-@ main loop toggles LED for testing purposes
-main_loop:
-    ldr r0, =hello_msg
-    bl printf
-    bl toggle_led
-
-    @ delay function for testing only
-    ldr r0, =50000000
+    ldr r0, =200000000                      @ small wait to allow time to connect to serial output
     delay_loop:
         subs r0, #1
         bne delay_loop
 
-    b main_loop
+    ldr r0, =hello_msg
+    bl printf
+
+    bl init_leds                            @ Initialise LED pins
+    bl install_alarm_isr                    @ Install the alarm ISR handler
+    
+
+@ main loop toggles LED for testing purposes
+main_loop:
+    
+    bl set_alarm                            @ Set a new alarm
+    wfi                                     @ Wait for interrupt
+    b main_loop                             @ Return to main loop
+
+install_alarm_isr:
+    push {lr}
+    @ get the address of RAM vector table
+    ldr r2, =(PPB_BASE + M0PLUS_VTOR_OFFSET) @ private peripheral bus + vector table offset register
+    ldr r1, [r2]
+    movs r2, #ALRM_ISR_OFFSET
+    add r2, r1
+    ldr r0, =alrm_isr
+
+    @ store the address of the alrm_isr handler to the vector table
+    str r0, [r2]
+
+    @ disable the ALARM0 IRQ by writing to ICPR
+    ldr r2, =(PPB_BASE + M0PLUS_ICPR_OFFSET) @ PPB + interrupt clear pending register offset
+    movs r0, #1
+    str r0, [r2]
+
+    @ enable the ALARM0 IRQ by writing to ISER
+    ldr r2, =(PPB_BASE + M0PLUS_NVIC_ISER_OFFSET)
+    movs r0, #1
+    str r0, [2]
+
+    pop {pc}
 
 @ Subroutine to toggle the LED GPIO pin value based on lab 3
 toggle_led:

@@ -58,21 +58,21 @@ install_svc_isr:
 @ SVC interrupt service handler routine
 .thumb_func                     @ Required for all interrupt service routines
 svc_isr:
-    push {lr}                   @ <TODO – add comment>
-    ldr r0, [sp, #0x1C]         @ <TODO – add comment>
-    subs r0, #0x2               @ <TODO – add comment>
-    ldr r0, [r0]                @ <TODO – add comment>
-    ldr r1, =#0xFF              @ <TODO – add comment>
-    ands r0, r1                 @ <TODO – add comment>
-    cmp r0, #SVC_MAX_INSTRS     @ <TODO – add comment>
-    bgt svc_done                @ <TODO – add comment>
-    adr r1, svc_jmptbl          @ <TODO – add comment>
-    lsls r0, #2                 @ <TODO – add comment>
-    ldr r1, [r1, r0]            @ <TODO – add comment>
-    mov pc, r1                  @ <TODO – add comment>
+    push {lr}                   @ Save the link register to return later
+    ldr r0, [sp, #0x1C]         @ Load PC from the stack frame (sp + 0x1C)
+    subs r0, #0x2               @ Subtract 2 to get the address of the SVC instruction
+    ldr r0, [r0]                @ Load the SVC instruction
+    ldr r1, =#0xFF              @ Prepare mask to get the SVC number
+    ands r0, r1                 @ Extract the SVC number (from 0 to 255)
+    cmp r0, #SVC_MAX_INSTRS     @ Check if the SVC number is greater than the max allowed
+    bgt svc_done                @ Return without doing anything if the SVC number is invalid
+    adr r1, svc_jmptbl          @ Load the address of the jump table
+    lsls r0, #2                 @ Multiply the SVC number by 4 to get the offset in the jump table
+    ldr r1, [r1, r0]            @ Load the handler function address form the jump table
+    mov pc, r1                  @ Jump to the handler
 
 svc_done:
-    pop {pc}                    @ <TODO – add comment>
+    pop {pc}                    @ Return from the interrupt
 
 @ First function of SVC subroutine - turn on the LED
 svc_num0:

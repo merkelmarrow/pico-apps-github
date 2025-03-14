@@ -38,16 +38,22 @@ do_sleep:
 
 @ Subroutine to initialise the LED
 init_gpio_led:
-
+    push {lr}
+    movs r0, #LED_GPIO_PIN      @ Load the LED GPIO No.
+    bl asm_gpio_init            @ Initialise
+    movs r0, #LED_GPIO_PIN      @ Load the LED GPIO Number again
+    movs r1, #LED_GPIO_OUT      @ Set direction to output
+    bl asm_gpio_set_dir
+    pop {pc}
 
 install_svc_isr:
-    ldr r2, =(PPB_BASE + M0PLUS_VTOR_OFFSET) @ private peripheral bus + vector table offset
-    ldr r1, [r2]                @ load the 
-    movs r2, #SVC_ISR_OFFSET    @ <TODO – add comment>
-    add r2, r1                  @ <TODO – add comment>
-    ldr r0, =svc_isr            @ <TODO – add comment>
-    str r0, [r2]                @ <TODO – add comment>
-    bx lr                       @ <TODO – add comment>
+    ldr r2, =(PPB_BASE + M0PLUS_VTOR_OFFSET) @ Get address of vector table register
+    ldr r1, [r2]                @ Load the base address of the vector table into r1
+    movs r2, #SVC_ISR_OFFSET    @ Load the SVC ISR offset in the vector table
+    add r2, r1                  @ Add base address and offset to get address of SVC ISR entry in vector table
+    ldr r0, =svc_isr            @ Load the address of the ISR handler
+    str r0, [r2]                @ Store the ISR handler address in the vector table
+    bx lr                       @ Return to caller
 
 @ SVC interrupt service handler routine
 .thumb_func                     @ Required for all interrupt service routines

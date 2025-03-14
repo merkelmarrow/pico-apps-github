@@ -19,7 +19,7 @@
 main_asm:
     bl init_gpio_led            @ Initialise the GPIO LED pin
     bl install_svc_isr          @ Install the SVC interrupt service routine
-    
+
 loop:
     svc #0                      @ Call the SVC ISR with value 0 (turns on LED)
     nop                         @ Add a no-op instruction for alignment after SVC
@@ -31,14 +31,18 @@ loop:
 
 @ Subroutine used to introduce a short delay in the application
 do_sleep:
+    push {lr}
+    ldr r0, =SLEEP_TIME         @ Load the sleep time
+    bl sleep_ms                 @ Call the sleep_ms function
+    pop {pc}
 
-
+@ Subroutine to initialise the LED
 init_gpio_led:
 
 
 install_svc_isr:
-    ldr r2, =(PPB_BASE + M0PLUS_VTOR_OFFSET) @ <TODO – add comment>
-    ldr r1, [r2]                @ <TODO – add comment>
+    ldr r2, =(PPB_BASE + M0PLUS_VTOR_OFFSET) @ private peripheral bus + vector table offset
+    ldr r1, [r2]                @ load the 
     movs r2, #SVC_ISR_OFFSET    @ <TODO – add comment>
     add r2, r1                  @ <TODO – add comment>
     ldr r0, =svc_isr            @ <TODO – add comment>

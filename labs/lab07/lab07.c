@@ -97,12 +97,6 @@ int main() {
 
   multicore_launch_core1(core1_entry);
 
-  // store the timing results
-  uint64_t start_time, end_time;
-  uint64_t single_time, double_time, total_time;
-  float pi_single;
-  double pi_double;
-
   // scenario 1: single core with cache enabled
   printf("--Scenario 1: single core, cache enabled--\n");
   set_xip_cache_en(true);
@@ -118,8 +112,44 @@ int main() {
   printf("Cache status: %s\n", get_xip_cache_en() ? "Enabled" : "Disabled");
   wallis_time_test_single_core();
 
-  
+  // scenario 3: double core with cache enabled
+  printf("--Scenario 3: dual core, cache enabled--\n");
+  set_xip_cache_en(true);
 
+  // store the timing results
+  uint64_t single_time, double_time, total_time;
+  double pi_double;
+
+  start_time = time_us_64();
+
+  printf("Cache status: %s\n", get_xip_cache_en() ? "Enabled" : "Disabled");
+  multicore_fifo_push_blocking((uintptr_t)&wallis_prod_float);
+  multicore_fifo_push_blocking(ITER_MAX);
+
+  uint64_t core0_start = time_us_64();
+  pi_double = calculate_pi_double(ITER_MAX);
+  uint64_t core0_end = time_us_64();
+  double_time = core0_end - core0_start;
+  
+  // Wait for core 1 to finish and get its timing
+  single_time = multicore_fifo_pop_blocking();
+
+  end_time = time_us_64();
+  total_time = end_time - start_time;
+
+  printf("Single precision pi time (us) = %f\n", single_time);
+  printf("Double precision pi time (us) = %f\n", double_time);
+  printf("Total time = %f\n", total_time);
+
+  // scenario 4: double core with cache disabled
+  printf("--Scenario 4: dual core, cache disabled--\n");
+  set_xip_cache_en(false);
+
+  printf("Cache status: %s\n", get_xip_cache_en() ? "Enabled" : "Disabled");
+  multicore_fifo_pop_blocking((uintptr_t)&wallis_prod_float);
+  multicore_fifo_push_blocking(ITER_MAX);
+
+  uint64_t core0_start = time_us_64
   
   
 
@@ -128,10 +158,10 @@ int main() {
 
 void wallis_time_test_single_core() {
   // run the single-precision wallis product
-  start_time = time_us_64();
-  pi_single = wallis_prod_float(ITER_MAX);
-  end_time = time_us_64();
-  single_time = end_time - start_time;
+  uint64_t start_time = time_us_64();
+  float pi_single = wallis_prod_float(ITER_MAX);
+  uint64_t end_time = time_us_64();
+  uint64_t single_time = end_time - start_time;
   printf("Single precision pi time (us) = %f\n", single_time);
 
   // run the double-precision wallis product

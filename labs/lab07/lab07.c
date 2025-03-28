@@ -127,11 +127,11 @@ int main() {
   multicore_fifo_push_blocking(ITER_MAX);
 
   uint64_t core0_start = time_us_64();
-  pi_double = calculate_pi_double(ITER_MAX);
+  pi_double = wallis_prod_double(ITER_MAX);
   uint64_t core0_end = time_us_64();
   double_time = core0_end - core0_start;
   
-  // Wait for core 1 to finish and get its timing
+  // wait for core 1 to finish and get its timing
   single_time = multicore_fifo_pop_blocking();
 
   end_time = time_us_64();
@@ -145,13 +145,26 @@ int main() {
   printf("--Scenario 4: dual core, cache disabled--\n");
   set_xip_cache_en(false);
 
+  start_time = time_us_64();
+
   printf("Cache status: %s\n", get_xip_cache_en() ? "Enabled" : "Disabled");
   multicore_fifo_pop_blocking((uintptr_t)&wallis_prod_float);
   multicore_fifo_push_blocking(ITER_MAX);
 
-  uint64_t core0_start = time_us_64
-  
-  
+  uint64_t core0_start = time_us_64();
+  pi_double = wallis_prod_double(ITER_MAX);
+  uint64_t core0_end = time_us_64();
+  double_time = core0_end - core0_start;
+
+  // wait for core 1 to finish and get its timing
+  single_time = multicore_fifo_pop_blocking();
+
+  end_time = time_us_64();
+  total_time = end_time - start_time;
+
+  printf("Single precision pi time (us) = %f\n", single_time);
+  printf("Double precision pi time (us) = %f\n", double_time);
+  printf("Total time = %f\n", total_time);
 
   return 0;
 }

@@ -55,7 +55,7 @@ add_compile_options(-Wall
         -Wno-maybe-uninitialized
         )
 
-# add_subdirectory(labs)
+add_subdirectory(labs)
 # add_subdirectory(assignments)
 # add_subdirectory(examples)
 # add_subdirectory(tools/debugprobe)

@@ -23,6 +23,14 @@ void main_asm();
  double wallis_prod_double(size_t n);
 
 
+/**
+ * @brief entry-point for core 1
+ * 
+ * function pointer is passed in via the FIFO with one incoming int32_t used as a parameter
+ * The function will provide an int32_t return value by pushing it back on the FIFO
+ * which indicates the result is ready
+ */
+
  void core1_entry() {
   while (1) {
       // get the function pointer from the FIFO

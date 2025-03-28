@@ -56,6 +56,11 @@ void main_asm();
   }
 }
 
+bool get_xip_cache_en() {
+  // the cache enable bit is bit 0 of the XIP_CTRL register
+  return (*(volatile uint32_t*)(XIP_CTRL_BASE) & 0x01) != 0;
+}
+
 
 /**
  * @brief LAB #07 - TEMPLATE

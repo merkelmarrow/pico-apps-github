@@ -87,7 +87,7 @@ bool set_xip_cache_en(bool cache_en) {
  * @brief runs and prints wallis time test results
  * NB: single core only
  */
-void wallis_time_test_single_core()
+void wallis_time_test_single_core();
 
 int main() {
   const int ITER_MAX = 100000;
@@ -148,7 +148,7 @@ int main() {
   start_time = time_us_64();
 
   printf("Cache status: %s\n", get_xip_cache_en() ? "Enabled" : "Disabled");
-  multicore_fifo_pop_blocking((uintptr_t)&wallis_prod_float);
+  multicore_fifo_push_blocking((uintptr_t)&wallis_prod_float);
   multicore_fifo_push_blocking(ITER_MAX);
 
   uint64_t core0_start = time_us_64();

@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <pico/stdlib>
+#include <hardware/multicore.h>
+#include <xip_ctrl.h>
 
 // Must declare the main assembly entry point before use.
 void main_asm();
@@ -87,7 +90,7 @@ bool set_xip_cache_en(bool cache_en) {
  * @brief runs and prints wallis time test results
  * NB: single core only
  */
-void wallis_time_test_single_core();
+void wallis_time_test_single_core(uint32_t iterations);
 
 int main() {
   const int ITER_MAX = 100000;
@@ -118,6 +121,7 @@ int main() {
 
   // store the timing results
   uint64_t single_time, double_time, total_time;
+  uint64_t start_time, end_time;
   double pi_double;
 
   start_time = time_us_64();
@@ -137,9 +141,9 @@ int main() {
   end_time = time_us_64();
   total_time = end_time - start_time;
 
-  printf("Single precision pi time (us) = %f\n", single_time);
-  printf("Double precision pi time (us) = %f\n", double_time);
-  printf("Total time = %f\n", total_time);
+  printf("Single precision pi time (us) = %llu\n", single_time);
+  printf("Double precision pi time (us) = %llu\n", double_time);
+  printf("Total time = %llu\n", total_time);
 
   // scenario 4: double core with cache disabled
   printf("--Scenario 4: dual core, cache disabled--\n");
@@ -162,27 +166,27 @@ int main() {
   end_time = time_us_64();
   total_time = end_time - start_time;
 
-  printf("Single precision pi time (us) = %f\n", single_time);
-  printf("Double precision pi time (us) = %f\n", double_time);
-  printf("Total time = %f\n", total_time);
+  printf("Single precision pi time (us) = %llu\n", single_time);
+  printf("Double precision pi time (us) = %llu\n", double_time);
+  printf("Total time = %llu\n", total_time);
 
   return 0;
 }
 
-void wallis_time_test_single_core() {
+void wallis_time_test_single_core(uint32_t iterations) {
   // run the single-precision wallis product
   uint64_t start_time = time_us_64();
   float pi_single = wallis_prod_float(ITER_MAX);
   uint64_t end_time = time_us_64();
   uint64_t single_time = end_time - start_time;
-  printf("Single precision pi time (us) = %f\n", single_time);
+  printf("Single precision pi time (us) = %llu\n", single_time);
 
   // run the double-precision wallis product
   start_time = time_us_64();
   pi_double = wallis_prod_double(ITER_MAX);
   end_time = time_us_64();
   double_time = end_time - start_time;
-  printf("Double precision pi time (us) = %f\n", double_time);
+  printf("Double precision pi time (us) = %llu\n", double_time);
 }
 
 

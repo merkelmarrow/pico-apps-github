@@ -13,6 +13,7 @@ if (EXISTS ${picoVscode})
 endif()
 # ====================================================================================
 set(PICO_BOARD pico CACHE STRING "Board type")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
 # CMake minimum version must be 3.13 or higher in order to use the Pico SDK
@@ -55,6 +56,6 @@ add_compile_options(-Wall
         )
 
 # add_subdirectory(labs)
-add_subdirectory(assignments)
+# add_subdirectory(assignments)
 # add_subdirectory(examples)
 # add_subdirectory(tools/debugprobe)

@@ -13,7 +13,6 @@ void main_asm();
  */
  float wallis_prod_float(size_t n);
 
-
  /**
   * @brief computes pi approximation using wallis product formula with double precision floats
   * 
@@ -23,10 +22,36 @@ void main_asm();
   */
  double wallis_prod_double(size_t n);
 
+
+ void core1_entry() {
+  while (1) {
+      // get the function pointer from the FIFO
+      void (*func)() = (void(*)()) multicore_fifo_pop_blocking();
+      int32_t p = multicore_fifo_pop_blocking();
+      
+      // take snapshot of timer
+      uint64_t start_time = time_us_64();
+      
+      // call the function (single or double precision)
+      if (func == (void*)calculate_pi_single) {
+          float result = calculate_pi_single((int)p);
+      } else {
+          double result = calculate_pi_double((int)p);
+      }
+      
+      // take snapshot of timer and calculate execution time
+      uint64_t end_time = time_us_64();
+      uint64_t execution_time = end_time - start_time;
+      
+      // return the execution time
+      multicore_fifo_push_blocking(execution_time);
+  }
+}
+
+
 /**
  * @brief LAB #07 - TEMPLATE
- *        Main entry point for the code - calls the main assembly
- *        function where the body of the code is implemented.
+ *        
  *
  * @return int      Returns exit-status zero on completion.
  */

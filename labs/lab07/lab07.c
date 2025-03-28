@@ -61,6 +61,28 @@ bool get_xip_cache_en() {
   return (*(volatile uint32_t*)(XIP_CTRL_BASE) & 0x01) != 0;
 }
 
+/**
+ * @brief set the enable status of the XIP cache
+ * 
+ * @param cache_en true to enable cache, false to disable
+ * @return bool the previous cache enable state
+ */
+bool set_xip_cache_en(bool cache_en) {
+  // get the current state
+  bool prev_state = get_xip_cache_en();
+  
+  // set the new state
+  uint32_t reg = *(volatile uint32_t*)(XIP_CTRL_BASE);
+  if (cache_en) {
+      reg |= 0x01; // set bit 0
+  } else {
+      reg &= ~0x01; // clear bit 0
+  }
+  *(volatile uint32_t*)(XIP_CTRL_BASE) = reg;
+  
+  return prev_state;
+}
+
 
 /**
  * @brief LAB #07 - TEMPLATE

@@ -41,10 +41,10 @@ void main_asm();
       uint64_t start_time = time_us_64();
       
       // call the function (single or double precision)
-      if (func == (void*)calculate_pi_single) {
-          float result = calculate_pi_single((int)p);
+      if (func == (void*)wallis_prod_float) {
+          float result = wallis_prod_float((int)p);
       } else {
-          double result = calculate_pi_double((int)p);
+          double result = wallis_prod_double((int)p);
       }
       
       // take snapshot of timer and calculate execution time
@@ -83,19 +83,49 @@ bool set_xip_cache_en(bool cache_en) {
   return prev_state;
 }
 
-
-/**
- * @brief LAB #07 - TEMPLATE
- *        
- *
- * @return int      Returns exit-status zero on completion.
- */
 int main() {
+  const int ITER_MAX = 100000;
+  stdio_init_all();
 
-  // Jump into the main assembly code subroutine.
-  main_asm();
+  sleep_ms(5000); // wait a few seconds to connect to the serial output
 
-  // Returning zero indicates everything went okay.
+  multicore_launch_core1(core1_entry);
+
+  // store the timing results
+  uint64_t start_time, end_time;
+  uint64_t single_time, double_time, total_time;
+  float pi_single;
+  double pi_double;
+
+  // scenario 1: single core with cache enabled
+  printf("--Scenario 1: single core, cache enabled--\n");
+  set_xip_cache_en(true);
+
+  printf("Cache status: %s\n", get_xip_cache_en() ? "Enabled" : "Disabled");
+
+  // run the single-precision wallis product
+  start_time = time_us_64();
+  pi_single = wallis_prod_float(ITER_MAX);
+  end_time = time_us_64();
+  single_time = end_time - start_time;
+  printf("Single precision pi time (us) = %f\n", single_time);
+
+  // run the double-precision wallis product
+  start_time = time_us_64();
+  pi_double = wallis_prod_double(ITER_MAX);
+  end_time = time_us_64();
+  double_time = end_time - start_time;
+  printf("Double precision pi time (us) = %f\n", double_time);
+
+
+  // scenario 2: single core with cache disabled
+  printf("--Scenario 2: single core, cache disabled--\n");
+  set_xip_cache_en(false);
+
+  printf("Cache status: %s\n", get_xip_cache_en() ? "Enabled" @ "Disabled");
+  
+  // run single-precision wallis 
+
   return 0;
 }
 

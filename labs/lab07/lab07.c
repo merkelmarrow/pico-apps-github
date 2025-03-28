@@ -83,6 +83,12 @@ bool set_xip_cache_en(bool cache_en) {
   return prev_state;
 }
 
+/**
+ * @brief runs and prints wallis time test results
+ * NB: single core only
+ */
+void wallis_time_test_single_core()
+
 int main() {
   const int ITER_MAX = 100000;
   stdio_init_all();
@@ -102,7 +108,25 @@ int main() {
   set_xip_cache_en(true);
 
   printf("Cache status: %s\n", get_xip_cache_en() ? "Enabled" : "Disabled");
+  wallis_time_test_single_core();
 
+
+  // scenario 2: single core with cache disabled
+  printf("--Scenario 2: single core, cache disabled--\n");
+  set_xip_cache_en(false);
+
+  printf("Cache status: %s\n", get_xip_cache_en() ? "Enabled" : "Disabled");
+  wallis_time_test_single_core();
+
+  
+
+  
+  
+
+  return 0;
+}
+
+void wallis_time_test_single_core() {
   // run the single-precision wallis product
   start_time = time_us_64();
   pi_single = wallis_prod_float(ITER_MAX);
@@ -116,17 +140,6 @@ int main() {
   end_time = time_us_64();
   double_time = end_time - start_time;
   printf("Double precision pi time (us) = %f\n", double_time);
-
-
-  // scenario 2: single core with cache disabled
-  printf("--Scenario 2: single core, cache disabled--\n");
-  set_xip_cache_en(false);
-
-  printf("Cache status: %s\n", get_xip_cache_en() ? "Enabled" @ "Disabled");
-  
-  // run single-precision wallis 
-
-  return 0;
 }
 
 
